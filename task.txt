@@ -1,0 +1,2 @@
+D1区分SUMM与SNIPPET并说明4K/k5/56.8%/6倍的原文限定；D2说明INTERACT三种动作与为何需要全文回查；D3解释最多查3篇、check后强制output、全文一次动作后移除的限制；D4判断本文是否证明摘要不会丢证据或交互检索必然更好。
+只根据所供原文。输出严格JSON，含decisions数组，id为D1至D4，各含answer、evidence数组（source_id、start_line、end_line整数且含两端）和limitations。无需重抄原文，按行定位。证据不足须明说。约1000中文字。

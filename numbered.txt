@@ -1,0 +1,195 @@
+SOURCE A-P5 physical PDF page 5
+1: Instruction: Write an accurate, engaging, and
+2: concise answer for ...
+3: <Retrieve for the question>
+4: Document [1](Title: American Decolonization)
+5: ...
+6: Document [2](Title: Decolonization) ...
+7: Document [3](Title: American Revolution) ...
+8: ...
+9: Question: When did US break away from England?
+10: Answer: The United States took the first step
+11: towards gaining independence ... [1][2]. The
+12: Treaty of Paris was later signed ... [3].
+13: Table 2: An example of our VANILLA method. Differ-
+14: ent colors represent prompt, model generation, and
+15: <actions>. We also provide two in-context demonstra-
+16: tions before the test example.
+17: response. We first define if a citation is “irrele-
+18: vant”. Intuitively, a citationci,jis “irrelevant” if (a)
+19: ci,jitself cannot supportsi and (b) removingci,j
+20: does not affect the rest of the citations to support
+21: si. Formally,ci,jis “irrelevant” if and only if
+22: (a) ϕ(ci,j,s i) = 0 , AND
+23: (b) ϕ(concat(Ci\{ci,j}),s i) = 1 .
+24: ci,j has a precision of 1 if si has recall =1 and
+25: ci,j is not irrelevant. For example (Figure 3),
+26: when s3 cites three references [2][4][5] and
+27: recall=1, [2] is “irrelevant” ifϕ([2],s 3) = 0 and
+28: ϕ([4][5],s 3) = 1 . For condition (b) to work, we
+29: set recall =1 as a prerequisite for precision = 1 .
+30: Note that this algorithm overlooks the scenario
+31: when one citation partially supports the statement.
+32: We discuss the details in §E.
+33: 3.4 ALCE is Robust to Shortcut Cases
+34: We showcase how the ALCE evaluation is robust
+35: to two possible shortcuts in §D: (1) using the top-1
+36: retrieved passage as the response and citing itself,
+37: and (2) using the first two sentences of the top-1
+38: passage. Both cases have almost-perfect citation
+39: scores, but (1) has low fluency due to its unnaturally
+40: long length compared to human answers, and (2)
+41: has low correctness due to low coverage.
+42: 4 Modeling
+43: In this section, we discuss three major modeling
+44: components for an ALCE system—retrieval, syn-
+45: thesis, and post-editing.
+46: 4.1 Retrieval
+47: We explore simple, off-the-shelf retrievers. We use
+48: dense retrievers for Wikipedia, including GTR (Ni
+49: et al., 2022) and DPR (Karpukhin et al., 2020);
+50: we use BM25 for Sphere. For each question, we
+51: retrieve the top-100 passages.
+52: 4.2 Synthesis
+53: We focus on how to prompt an LLM to interact
+54: with the retriever, and synthesize and cite the ev-
+55: idence (without fine-tuning internal parameters).
+56: One noteworthy challenge is that existing LLMs
+57: all have limited context window and thus can only
+58: fit a handful of passages.
+59: VANILLA . We simply provide the model with the
+60: top-k9 passages and instruct the model to cite ac-
+61: cordingly (Table 2). We also use in-context learn-
+62: ing (Brown et al., 2020) and prepend two demon-
+63: strations. The complete instruction is in Table 23.
+64: SUMM/SNIPPET . With a 4K context window, we
+65: can at most safely fitk = 5 passages. As shown in
+66: Figure 4, top-5 retrieved passages can only cover
+67: 56.8% percent of the answers in ASQA.
+68: To tackle this limitation, we propose to provide
+69: summaries or snippets of passages instead of the
+70: full text (summaries are abstractive but snippets are
+71: spans from passages). We acquire summaries and
+72: snippets by prompting ChatGPT with instructions
+73: (prompts in Table 25 and 26).10 Then we replace
+74: all passages with summaries/snippets. Summaries
+75: or snippets significantly reduce the passage length,
+76: allowing for more passages to fit in: for ASQA,
+77: they reduce passage length by 6×on average.
+78: Though SUMM/SNIPPET allows for more re-
+79: trieved passages, they are lossy compressions. To
+80: alleviate this problem, we propose INTERACT , an
+81: interactive prompting scheme to allow the model to
+82: check the full text of certain passages. At each step,
+83: the model can execute one of three actions: (1)
+84: “Check: Document [1][2]” to check the full text
+85: of the corresponding documents; (2) “Output:” to
+86: output a statement of the answer; (3) “End.” to end
+87: the generation. §C provides more details.
+88: INLINE SEARCH . The above methods all dis-
+89: play retrieval results at the beginning. In INLI -
+90: NESEARCH , we allow LLMs to call “search” dur-
+91: ing the generation process (Yao et al., 2023; Press
+92: et al., 2022; Jiang et al., 2023). At each step, the
+93: model can execute one of three actions: “Search:
+94: 9We can fit at most k = 3 for models with 2K window
+95: and at most k = 5 for models with 4K context window.
+96: 10We also query ChatGPT whether the passage is relevant
+97: to the question, and filter out passages that are “irrelevant”.
+98: 6469
+
+SOURCE A-P15 physical PDF page 15
+1: cate model output by new lines, as non-instruction-
+2: tuned models may generate more content after new
+3: lines that are irrelevant.
+4: INTERACT . Empirically, we found that models
+5: tend to execute too many consecutive “check” ac-
+6: tions, so we force the model to always “ output”
+7: after each “check”. We limit the maximum number
+8: of passages to check as 3 to avoid exceeding the
+9: length limit. The full passages are removed from
+10: the context after one action to save context space.
+11: Table 27 provides an example for INTERACT .
+12: Main experiments. For all experiments except
+13: ChatGPT RERANK , we run each model three times
+14: with different seeds and each time we sample two
+15: demonstrations from a pool of four. We report the
+16: averaged scores for all experiments in the main
+17: paper and we report the standard deviations in Ap-
+18: pendix G.6.
+19: Decoding methods. Based on preliminary experi-
+20: ments we choose the following decoding methods:
+21: For ChatGPT and GPT-4, we use sampling with
+22: temperature 0.5; for all open-source models, we
+23: use Nucleus sampling (Holtzman et al., 2020) and
+24: set top_p = 0.95.
+25: D ALCE Catches Shortcut Cases
+26: Fluency Correct. Citation
+27: (MAUVE) (EM Rec.) Rec. Prec.
+28: ChatGPT 66.6 40.4 73.6 63.0
+29: Top-1 passage 20.8 35.1 99.4 99.4
+30: First 2 sents 67.2 18.9 98.7 98.7
+31: Table 11: ASQA cheating cases. “ChatGPT”: the Chat-
+32: GPT VANILLA model with GTR-retrieved top-5 pas-
+33: sages. “Top-1 passage”: use the top-1 retrieved passage
+34: as the response. “First 2 sents”: use the first 2 sentences
+35: of the top-1 retrieved passage.
+36: Table 11 demonstrates the experiments to show
+37: that ALCE is robust to shortcut cases. Using the
+38: top-1 passages or first two sentences of the top-1
+39: passages induces almost perfect citation quality,
+40: but fluency and correctness are dramatically lower.
+41: E Citation Recall Discussion
+42: Our citation precision evaluation cannot detect a
+43: citation that partially supports the statement and
+44: hence will falsely penalize it. Consider a state-
+45: ments3 and its citations [2][4][5]: if [2] entails
+46: partial information ofs3 that [4][5] also entails,
+47: [2] will be counted as “irrelevant” while it should
+48: not be penalized. Liu et al. (2023) conduct hu-
+49: man evaluation on citation precision in a different
+50: way: For each citation, they ask annotators to judge
+51: whether the citation (1) fully support, (2) partially
+52: support, or (3) does not supportsi. One citationci,j
+53: is precise if (a)ci,jfully supportssi or (b)Ci fully
+54: supportssi,ci,jpartially supportssi, and noc∈Ci
+55: alone fully supportssi. This evaluation solved the
+56: corner case we mentioned in the main paper (one
+57: citation partially supports the claim but is identi-
+58: fied as “irrelevant”). However, it is challenging to
+59: conduct such evaluation automatically, as there is
+60: no existing model that can judge whether a cita-
+61: tion “partially” supports a claim. We also explore
+62: prompting ChatGPT to conduct such a task, which
+63: yields poor results. We defer it to future work to
+64: collect supervised data to train a betterϕthat can
+65: detect “partial support”.
+66: F Human Evaluation
+67: We employ Surge AI ( https://www.surgehq.
+68: ai/) for our human evaluation. The average pay to
+69: workers is 20 USD per hour. We randomly sample
+70: 100 examples from ASQA and ELI5 and annotate
+71: outputs of selected models: ChatGPT VANILLA ,
+72: ChatGPT RERANK , and Vicuna-13B VANILLA .
+73: F.1 Utility
+74: To check if the model output is useful to down-
+75: stream users, we measure the utility of the response
+76: S. We first show the queryq and model response
+77: S to the worker and ask them to rate their agree-
+78: ment with the statement "The response is a helpful
+79: and informative answer to the query" on a Likert
+80: scale of 1-5, corresponding to Strongly Disagree,
+81: Disagree, Neutral, Agree, and Strongly Agree.
+82: F.2 Citation Recall
+83: The annotators are shown the questionq, the state-
+84: mentsi, and all of its citationsCi, and they rate if
+85: the joint set of citations fully support the statement
+86: (recall=1) or if they do not support all the claims
+87: (recall=0). We calculate the overall recall score
+88: for the generation by taking an average of all the
+89: statements’ recall scores.
+90: F.3 Citation Precision
+91: We show the questionq and a pair of a statement
+92: si and one of its citationci,j∈Ci to the annotator.
+93: We ask the annotator if the citation fully supports,
+94: 6479

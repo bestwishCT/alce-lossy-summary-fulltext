@@ -1,0 +1,112 @@
+{
+  "status": "ranges_valid",
+  "errors": [],
+  "semantic": "not_evaluated",
+  "excerpts": [
+    {
+      "decision": "D1",
+      "source_id": "A-P5",
+      "start_line": 64,
+      "end_line": 66,
+      "text": "SUMM/SNIPPET . With a 4K context window, we\ncan at most safely fitk = 5 passages. As shown in\nFigure 4, top-5 retrieved passages can only cover"
+    },
+    {
+      "decision": "D1",
+      "source_id": "A-P5",
+      "start_line": 67,
+      "end_line": 67,
+      "text": "56.8% percent of the answers in ASQA."
+    },
+    {
+      "decision": "D1",
+      "source_id": "A-P5",
+      "start_line": 69,
+      "end_line": 76,
+      "text": "summaries or snippets of passages instead of the\nfull text (summaries are abstractive but snippets are\nspans from passages). We acquire summaries and\nsnippets by prompting ChatGPT with instructions\n(prompts in Table 25 and 26).10 Then we replace\nall passages with summaries/snippets. Summaries\nor snippets significantly reduce the passage length,\nallowing for more passages to fit in: for ASQA,"
+    },
+    {
+      "decision": "D1",
+      "source_id": "A-P5",
+      "start_line": 75,
+      "end_line": 77,
+      "text": "or snippets significantly reduce the passage length,\nallowing for more passages to fit in: for ASQA,\nthey reduce passage length by 6×on average."
+    },
+    {
+      "decision": "D1",
+      "source_id": "A-P5",
+      "start_line": 94,
+      "end_line": 95,
+      "text": "9We can fit at most k = 3 for models with 2K window\nand at most k = 5 for models with 4K context window."
+    },
+    {
+      "decision": "D2",
+      "source_id": "A-P5",
+      "start_line": 80,
+      "end_line": 86,
+      "text": "alleviate this problem, we propose INTERACT , an\ninteractive prompting scheme to allow the model to\ncheck the full text of certain passages. At each step,\nthe model can execute one of three actions: (1)\n“Check: Document [1][2]” to check the full text\nof the corresponding documents; (2) “Output:” to\noutput a statement of the answer; (3) “End.” to end"
+    },
+    {
+      "decision": "D2",
+      "source_id": "A-P5",
+      "start_line": 78,
+      "end_line": 79,
+      "text": "Though SUMM/SNIPPET allows for more re-\ntrieved passages, they are lossy compressions. To"
+    },
+    {
+      "decision": "D2",
+      "source_id": "A-P5",
+      "start_line": 56,
+      "end_line": 59,
+      "text": "One noteworthy challenge is that existing LLMs\nall have limited context window and thus can only\nfit a handful of passages.\nVANILLA . We simply provide the model with the"
+    },
+    {
+      "decision": "D2",
+      "source_id": "A-P5",
+      "start_line": 69,
+      "end_line": 73,
+      "text": "summaries or snippets of passages instead of the\nfull text (summaries are abstractive but snippets are\nspans from passages). We acquire summaries and\nsnippets by prompting ChatGPT with instructions\n(prompts in Table 25 and 26).10 Then we replace"
+    },
+    {
+      "decision": "D3",
+      "source_id": "A-P15",
+      "start_line": 4,
+      "end_line": 10,
+      "text": "INTERACT . Empirically, we found that models\ntend to execute too many consecutive “check” ac-\ntions, so we force the model to always “ output”\nafter each “check”. We limit the maximum number\nof passages to check as 3 to avoid exceeding the\nlength limit. The full passages are removed from\nthe context after one action to save context space."
+    },
+    {
+      "decision": "D3",
+      "source_id": "A-P5",
+      "start_line": 82,
+      "end_line": 86,
+      "text": "check the full text of certain passages. At each step,\nthe model can execute one of three actions: (1)\n“Check: Document [1][2]” to check the full text\nof the corresponding documents; (2) “Output:” to\noutput a statement of the answer; (3) “End.” to end"
+    },
+    {
+      "decision": "D3",
+      "source_id": "A-P15",
+      "start_line": 7,
+      "end_line": 9,
+      "text": "after each “check”. We limit the maximum number\nof passages to check as 3 to avoid exceeding the\nlength limit. The full passages are removed from"
+    },
+    {
+      "decision": "D4",
+      "source_id": "A-P5",
+      "start_line": 78,
+      "end_line": 83,
+      "text": "Though SUMM/SNIPPET allows for more re-\ntrieved passages, they are lossy compressions. To\nalleviate this problem, we propose INTERACT , an\ninteractive prompting scheme to allow the model to\ncheck the full text of certain passages. At each step,\nthe model can execute one of three actions: (1)"
+    },
+    {
+      "decision": "D4",
+      "source_id": "A-P15",
+      "start_line": 25,
+      "end_line": 41,
+      "text": "D ALCE Catches Shortcut Cases\nFluency Correct. Citation\n(MAUVE) (EM Rec.) Rec. Prec.\nChatGPT 66.6 40.4 73.6 63.0\nTop-1 passage 20.8 35.1 99.4 99.4\nFirst 2 sents 67.2 18.9 98.7 98.7\nTable 11: ASQA cheating cases. “ChatGPT”: the Chat-\nGPT VANILLA model with GTR-retrieved top-5 pas-\nsages. “Top-1 passage”: use the top-1 retrieved passage\nas the response. “First 2 sents”: use the first 2 sentences\nof the top-1 retrieved passage.\nTable 11 demonstrates the experiments to show\nthat ALCE is robust to shortcut cases. Using the\ntop-1 passages or first two sentences of the top-1\npassages induces almost perfect citation quality,\nbut fluency and correctness are dramatically lower.\nE Citation Recall Discussion"
+    },
+    {
+      "decision": "D4",
+      "source_id": "A-P15",
+      "start_line": 41,
+      "end_line": 55,
+      "text": "E Citation Recall Discussion\nOur citation precision evaluation cannot detect a\ncitation that partially supports the statement and\nhence will falsely penalize it. Consider a state-\nments3 and its citations [2][4][5]: if [2] entails\npartial information ofs3 that [4][5] also entails,\n[2] will be counted as “irrelevant” while it should\nnot be penalized. Liu et al. (2023) conduct hu-\nman evaluation on citation precision in a different\nway: For each citation, they ask annotators to judge\nwhether the citation (1) fully support, (2) partially\nsupport, or (3) does not supportsi. One citationci,j\nis precise if (a)ci,jfully supportssi or (b)Ci fully\nsupportssi,ci,jpartially supportssi, and noc∈Ci\nalone fully supportssi. This evaluation solved the"
+    }
+  ]
+}

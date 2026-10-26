@@ -1,0 +1,107 @@
+{
+  "decisions": [
+    {
+      "id": "D1",
+      "answer": "区分三类文本：\n- 抽象摘要（SUMM）：论文将“summaries”定义为抽象性压缩（abstractive），由模型生成，用以替代长段落以节省上下文空间；\n- 原文span（SNIPPET）：论文将“snippets”定义为从原始通篇抽取的片段（spans from passages），也是对原文的压缩但保持原句片段；\n- 全文（full text）：检索到的完整 passage 原文。 \n文本容量与检索上限：对于 4K 上下文窗口，论文指出“最多安全放入 k=5 个 passages”（4K→k=5）；用 top-5 检索的 passages 只能覆盖 ASQA 答案的 56.8%（覆盖度指标）；将 passages 替换为 summaries/snippets 可以将段落长度平均缩短约 6×，从而能将更多条目塞进上下文。 \n动作/上下文生命周期表（概念性）：\n1) 初始检索：检索 top-N passages（N 可大，如 top-100），将 top-k 放入上下文；\n2) 压缩替代：用 SUMM 或 SNIPPET 替换完整 passages 以减少长度；\n3) （如需要）交互检查：对若干条目执行“Check”以读取其 full text；\n4) 输出/结束：在检查后必须或可执行“Output”或“End”；检查过的全文会被从上下文移除以节省空间。 \n收益声称（paper 给出的主张）：通过 SUMM/SNIPPET 能显著减少长度（约 6×），使更多候选证据能入上下文，从而提高被覆盖的候选量。限制（paper 同时明确或暗含）：SUMM/SNIPPET 是有损压缩，可能丢失证据细节，top-5 覆盖仅 56.8%，因此仍有大量答案无法被覆盖。",
+      "evidence": [
+        {
+          "source_id": "A-P5",
+          "start_line": 64,
+          "end_line": 66
+        },
+        {
+          "source_id": "A-P5",
+          "start_line": 67,
+          "end_line": 67
+        },
+        {
+          "source_id": "A-P5",
+          "start_line": 69,
+          "end_line": 76
+        },
+        {
+          "source_id": "A-P5",
+          "start_line": 75,
+          "end_line": 77
+        },
+        {
+          "source_id": "A-P5",
+          "start_line": 94,
+          "end_line": 95
+        }
+      ],
+      "limitations": "基于提供的片段，论文陈述了 4K→k=5、56.8% 覆盖率与 6× 压缩率，但没有在这些片段中给出完整的数量学细节（例如样本量、方差或不同问题类型的分布），也未在此处呈现 SUMM 与 SNIPPET 在精确保留信息方面的定量比较。"
+    },
+    {
+      "id": "D2",
+      "answer": "INTERACT 的三种可执行动作（按论文定义）：\n1) “Check: Document [i]”——请求查看对应文档的完整文本（full text）；\n2) “Output:”——输出回答语句；\n3) “End.”——结束生成。 \n为何需要全文回查（rationale）：SUMM/SNIPPET 属于有损压缩（lossy），会丢掉部分细节或证据，论文因此提出 INTERACT 让模型在必要时对某些候选条目读取完整 passage 以核对证据或补足摘要/片段遗漏；另一个驱动是模型与检索器的上下文窗口限制（LLM 的上下文有限，无法一次塞入过多完整 passages），所以先压缩再按需检查能在预算内兼顾覆盖与精确性。 \n（同时区分 SUMM 与 SNIPPET：SUMM 为抽象重写，SNIPPET 为原文 span；Check 动作明确读取“full text”以对齐原始证据。）",
+      "evidence": [
+        {
+          "source_id": "A-P5",
+          "start_line": 80,
+          "end_line": 86
+        },
+        {
+          "source_id": "A-P5",
+          "start_line": 78,
+          "end_line": 79
+        },
+        {
+          "source_id": "A-P5",
+          "start_line": 56,
+          "end_line": 59
+        },
+        {
+          "source_id": "A-P5",
+          "start_line": 69,
+          "end_line": 73
+        }
+      ],
+      "limitations": "片段未包含 INTERACT 在各种数据集上的详细定量效益（例如准确率、召回随检查次数变化的曲线）。只说明了设计动机与动作定义，但未在这些片段中给出充分的实验对比以证明全文回查在所有情形下的必要性或收益边界。"
+    },
+    {
+      "id": "D3",
+      "answer": "论文在实现 INTERACT 时施加的三项操作性限制：\n1) 最多检查 3 篇文档（max check = 3）；\n2) 为抑制模型连续过度“check”，每次执行“check”后强制模型紧接着执行“output”（即检查后必须输出一次），论文明确指出“force the model to always ‘output’ after each ‘check’”；\n3) 检查过的完整 passages 在执行一次动作后会被从上下文中移除以节省空间（full passages are removed from the context after one action）。 \n这些限制的直接后果（生命周期说明）：当模型在压缩上下文中发现疑问时，能对最多三条候选调用 Check 来获取全文，但每次 Check 都会触发一次输出，且读入的全文随后被删去，从而把有限的上下文空间留给后续交互或输出，避免上下文超限与无限制连续读取。",
+      "evidence": [
+        {
+          "source_id": "A-P15",
+          "start_line": 4,
+          "end_line": 10
+        },
+        {
+          "source_id": "A-P5",
+          "start_line": 82,
+          "end_line": 86
+        },
+        {
+          "source_id": "A-P15",
+          "start_line": 7,
+          "end_line": 9
+        }
+      ],
+      "limitations": "文中片段说明了这些实现性约束与其设计动机，但没有在这些段落中呈现关于“为何最多 3 篇”为最佳选择的消融实验或理论证明，也未报告在不同预算（如 1、2、3、更多检查次数）下性能的变化细节。"
+    },
+    {
+      "id": "D4",
+      "answer": "问题：本文是否证明“摘要不会丢证据”或“交互检索必然更好”？\n基于所给原文片段的判断：\n- 论文明确承认 SUMM/SNIPPET 是有损压缩（\"they are lossy compressions\"），并将 INTERACT 作为“缓解（alleviate）”这一问题的方案；因此论文并未声称摘要不会丢证据，反而承认存在信息丢失风险。 \n- 关于交互检索（INTERACT）必然优于非交互方法：论文提出 INTERACT 作为补偿机制并规定了交互动作与限制，但在所提供片段中没有充分的定量比较或证明显示 INTERACT 在所有场景下恒优。片段中有关于鲁棒性与作弊案例的分析（比如表 11 指出某些作弊方式导致高引用分数但低流畅性/正确性），以及对引用召回/精度评估的讨论，说明评估本身存在难题（例如部分支持无法自动判别）；这些内容反而提示交互方法的效果受评估与任务细节影响。 \n结论：基于提供文本，不能断言论文证明“摘要不丢证据”或“交互必然更好”；论文既承认压缩可能丢失信息，也仅提出交互作为缓解手段，但在这些片段中缺乏可证明此法普遍优越的充分实验证据。",
+      "evidence": [
+        {
+          "source_id": "A-P5",
+          "start_line": 78,
+          "end_line": 83
+        },
+        {
+          "source_id": "A-P15",
+          "start_line": 25,
+          "end_line": 41
+        },
+        {
+          "source_id": "A-P15",
+          "start_line": 41,
+          "end_line": 55
+        }
+      ],
+      "limitations": "判断仅基于所给两页片段；若要最终结论需要查看全文的实验表格（INTERACT 对比 SUMM/SNIPPET/VANILLA 的具体数值、消融实验、不同数据集上的统计显著性）以及方法实现细节。当前片段提供动机与设计，并讨论了评估局限，但未呈现足够的定量证据来支撑绝对结论。"
+    }
+  ]
+}
